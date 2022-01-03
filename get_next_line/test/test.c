@@ -10,11 +10,14 @@ typedef struct s_list
 
 char    *get_next_line(int fd)
 {
-    static char buffer[1];
+    char buffer[1];
     static char result[100];
     int i;
 
     i = 0;
+	while (result[i])
+		result[i++] = '\0';
+	i = 0;
     while (read(fd, buffer, 1))
     {
         result[i] = buffer[0];
