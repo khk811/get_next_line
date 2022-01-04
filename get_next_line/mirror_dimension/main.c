@@ -8,10 +8,14 @@ int main()
 
     target_fd = open("./read_fd_target", O_RDONLY);
     result = get_next_line(target_fd);
-    if (result)
+    while (result)
     {
-        while (*result)
-            write(1, result++, 1);
+        if (result)
+        {
+            while (*result)
+                write(1, result++, 1);
+        }
+        result = get_next_line(target_fd);
     }
     return (0);
 }
