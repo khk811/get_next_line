@@ -6,7 +6,7 @@ char    *get_next_line(int fd)
     char    *result;
     int i;
 
-    if (!read(fd, buffer, BUFFER_SIZE))
+    if (read(fd, buffer, BUFFER_SIZE) == -1)
         return (NULL);
     i = 0;
     while (buffer[i])
