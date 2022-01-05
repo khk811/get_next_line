@@ -16,6 +16,7 @@ int main()
                 write(1, result++, 1);
         }
         result = get_next_line(target_fd);
+		write(1, "/", 1);
     }
     return (0);
 }
