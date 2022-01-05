@@ -1,22 +1,15 @@
+#include <stdio.h>
 #include "gnl.h"
 #include <fcntl.h>
 
-int main()
+int	main()
 {
-    int target_fd;
-    char    *result;
+	int	target_fd;
+	int	i;
 
-    target_fd = open("./read_fd_target", O_RDONLY);
-    result = get_next_line(target_fd);
-    while (result)
-    {
-        if (result)
-        {
-            while (*result)
-                write(1, result++, 1);
-        }
-        result = get_next_line(target_fd);
-		write(1, "/", 1);
-    }
-    return (0);
+	i = 0;
+	target_fd = open("./short_target", O_RDONLY);
+	while (i++ < 5)
+		get_next_line(target_fd);
+	return (0);
 }
