@@ -22,6 +22,9 @@ static void	ft_gnl_lst(t_list **lst, void *content)
 		return ;
 	new->content = content;
 	new->next = NULL;
+	if (*lst)
+		printf("*lst: %s\n", (*lst)->content);
+	printf("new: %s\n", new->content);
 	if (!*lst)
 	{
 		*lst = new;
