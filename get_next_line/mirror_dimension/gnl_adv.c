@@ -17,8 +17,6 @@ static void	ft_gnl_lst(t_list **lst, void *content)
 	t_list	*new;
 	t_list	*last;
 
-	if (*lst)
-		printf("lst: %s\n", (*lst)->content);
 	new = malloc(sizeof(t_list));
 	if (!new)
 		return ;
@@ -27,14 +25,26 @@ static void	ft_gnl_lst(t_list **lst, void *content)
 	if (!*lst)
 	{
 		*lst = new;
-		printf("add new element: %s\n", (*lst)->content);
 		return ;
 	}
 	last = ft_lstlast(*lst);
-	printf("last: %s\n", last->content);
-	printf("lst: %s\n", (*lst)->content);
 	last->next = new;
 }
+
+static void	ft_lst_print(t_list **lst)
+{
+	t_list	*tmp;
+
+	tmp = *lst;
+	while (tmp)
+	{
+		if (!tmp)
+			return ;
+		printf("**element: %s\n", tmp->content);
+		tmp = tmp->next;
+	}
+}
+
 /*
 static t_list	*ft_check_newline(t_list **lst)
 {
@@ -63,19 +73,22 @@ char	*get_next_line(int fd)
 	static t_list	*lst = NULL;
 	int	read_int;
 
+	if (lst)
+		printf("***%s\n", lst->content);
 	read_int = read(fd, buf, BUFFER_SIZE);
 	if (read_int == -1 || read_int == 0)
 		return (NULL);
 	printf("read is done\n");
+	if (lst)
+		printf("--->%s\n", lst->content);
 	ft_gnl_lst(&lst, buf);
+	printf("=========%s\n", lst->content);
 	/*
 	if (!ft_check_newline(&lst))
 		return (NULL);
 		*/
-	if (lst->content)
-		printf("lst result: %s\n", lst->content);
-	else
-		printf("???\n");
+	ft_lst_print(&lst);
+	printf(">>>>>>>>>>>>>>>>%s\n", lst->content);
 	printf("\n\n");
 	return (NULL);
 }
