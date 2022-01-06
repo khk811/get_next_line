@@ -1,6 +1,21 @@
 #include "gnl.h"
 #include <stdio.h>
 
+static void	*ft_memcpy(void *dst, void *src, size_t n)
+{
+	size_t	i;
+
+	if (!dst && !src)
+		return (NULL);
+	i = 0;
+	while (i < n)
+	{
+		*(unsigned char *)(dst + i) = *(unsigned char *)(src + i);
+		i++;
+	}
+	return (dst);
+}
+
 static t_list	*ft_lstlast(t_list *lst)
 {
 	while (lst)
@@ -16,15 +31,15 @@ static void	ft_gnl_lst(t_list **lst, void *content)
 {
 	t_list	*new;
 	t_list	*last;
+	char	*str;
 
 	new = malloc(sizeof(t_list));
+	str = (char *)malloc(sizeof(char) * (BUFFER_SIZE));
 	if (!new)
 		return ;
-	new->content = content;
+	ft_memcpy(str, content, BUFFER_SIZE);
+	new->content = str;
 	new->next = NULL;
-	if (*lst)
-		printf("*lst: %s\n", (*lst)->content);
-	printf("new: %s\n", new->content);
 	if (!*lst)
 	{
 		*lst = new;
@@ -76,22 +91,15 @@ char	*get_next_line(int fd)
 	static t_list	*lst = NULL;
 	int	read_int;
 
-	if (lst)
-		printf("***%s\n", lst->content);
 	read_int = read(fd, buf, BUFFER_SIZE);
 	if (read_int == -1 || read_int == 0)
 		return (NULL);
-	printf("read is done\n");
-	if (lst)
-		printf("--->%s\n", lst->content);
 	ft_gnl_lst(&lst, buf);
-	printf("=========%s\n", lst->content);
 	/*
 	if (!ft_check_newline(&lst))
 		return (NULL);
 		*/
 	ft_lst_print(&lst);
-	printf(">>>>>>>>>>>>>>>>%s\n", lst->content);
 	printf("\n\n");
 	return (NULL);
 }
