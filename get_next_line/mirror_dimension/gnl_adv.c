@@ -43,11 +43,12 @@ static void	ft_gnl_lst(t_list **lst, void *content)
 	if (!*lst)
 	{
 		*lst = new;
-		printf("[new!!]\n");
+		//printf("[new!!] : %s\n", (*lst)->content);
 		return ;
 	}
 	last = ft_lstlast(*lst);
 	last->next = new;
+	//printf("last: %s\n", (last->next)->content);
 }
 
 static int	ft_check_read(int n)
@@ -72,7 +73,11 @@ static char	*ft_ret_line(t_list **lst, char *result, int len)
 		while (*content)
 		{
 			if (*content == '\n')
+			{
+				result[i++] = *content;
+				//printf("the result: %s", result);
 				break ;
+			}
 			result[i] = *content;
 			i++;
 			content++;
@@ -83,6 +88,17 @@ static char	*ft_ret_line(t_list **lst, char *result, int len)
 	}
 	result[i] = '\0';
 	return (result);
+}
+
+static void	ft_add_leftover(char *str, t_list **lst)
+{
+	if (*str)
+	{
+		(*lst)->content = str;
+		(*lst)->next = NULL;
+	}
+	else if (!*str)
+		*lst = NULL;
 }
 
 static char *ft_check_newline(t_list **lst, char *result)
@@ -100,11 +116,11 @@ static char *ft_check_newline(t_list **lst, char *result)
 		{
 			if (*content == '\n')
 			{
-				result = (char *)malloc(sizeof(char) * (i + 1));
+				result = (char *)malloc(sizeof(char) * (i + 3));
 				if (!result)
 					printf("I can't");
-				ft_ret_line(lst, result, i);
-				*lst = NULL;
+				result = ft_ret_line(lst, result, i);
+				ft_add_leftover(++content, lst);
 				return (result);
 			}
 			i++;
