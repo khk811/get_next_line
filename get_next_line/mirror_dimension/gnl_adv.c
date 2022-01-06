@@ -49,20 +49,6 @@ static void	ft_gnl_lst(t_list **lst, void *content)
 	last->next = new;
 }
 
-static void	ft_lst_print(t_list **lst)
-{
-	t_list	*tmp;
-
-	tmp = *lst;
-	while (tmp)
-	{
-		if (!tmp)
-			return ;
-		printf("**element: %s\n", tmp->content);
-		tmp = tmp->next;
-	}
-}
-
 static int	ft_check_read(int n)
 {
 	if (n == -1 || n == 0)
@@ -71,27 +57,52 @@ static int	ft_check_read(int n)
 		return (1);
 }
 
-/*
-static t_list	*ft_check_newline(t_list **lst)
+static void	ft_print_lst(t_list	**lst)
 {
+	t_list	*tmp;
 	char	*content;
 
-	while ((*lst)->next)
+	tmp = *lst;
+	while (tmp)
 	{
-		content = (*lst)->content;
+		content = tmp->content;
+		while (*content && *content != '\n')
+		{
+			write(1, content, 1);
+			content++;
+		}
+		if (!tmp->next)
+			break ;
+		tmp = tmp->next;
+	}
+	write(1, "**\n", 3);
+	*lst = NULL;
+}
+
+static void	ft_check_newline(t_list **lst)
+{
+	t_list	*tmp;
+	char	*content;
+
+	tmp = *lst;
+	while (tmp->next)
+	{
+		content = tmp->content;
 		while (*content)
 		{
 			if (*content == '\n')
-				return (*lst);
+			{
+				ft_print_lst(lst);
+				return ;
+			}
 			content++;
 		}
-		if (!(*lst)->next)
+		if (!tmp->next)
 			break ;
-		*lst = (*lst)->next;
+		tmp = tmp->next;
 	}
-	return (NULL);
 }
-*/
+
 char	*get_next_line(int fd)
 {
 	char	buf[BUFFER_SIZE];
@@ -100,12 +111,9 @@ char	*get_next_line(int fd)
 
 	if (!ft_check_read(read(fd, buf, BUFFER_SIZE)))
 		return (NULL);
+	if (!lst)
+		printf("(lst = null)\n");
 	ft_gnl_lst(&lst, buf);
-	/*
-	if (!ft_check_newline(&lst))
-		return (NULL);
-		*/
-	ft_lst_print(&lst);
-	printf("\n\n");
+	ft_check_newline(&lst);
 	return (NULL);
 }
