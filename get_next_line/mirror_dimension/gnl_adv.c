@@ -43,6 +43,7 @@ static void	ft_gnl_lst(t_list **lst, void *content)
 	if (!*lst)
 	{
 		*lst = new;
+		printf("[new!!]\n");
 		return ;
 	}
 	last = ft_lstlast(*lst);
@@ -57,63 +58,75 @@ static int	ft_check_read(int n)
 		return (1);
 }
 
-static void	ft_print_lst(t_list	**lst)
+static char	*ft_ret_line(t_list **lst, char *result, int len)
 {
+	int	i;
 	t_list	*tmp;
 	char	*content;
 
+	i = 0;
 	tmp = *lst;
-	while (tmp)
+	while (tmp && i < len)
 	{
 		content = tmp->content;
-		while (*content && *content != '\n')
+		while (*content)
 		{
-			write(1, content, 1);
+			if (*content == '\n')
+				break ;
+			result[i] = *content;
+			i++;
 			content++;
 		}
 		if (!tmp->next)
 			break ;
 		tmp = tmp->next;
 	}
-	write(1, "**\n", 3);
-	*lst = NULL;
+	result[i] = '\0';
+	return (result);
 }
 
-static void	ft_check_newline(t_list **lst)
+static char *ft_check_newline(t_list **lst, char *result)
 {
 	t_list	*tmp;
 	char	*content;
+	int	i;
 
 	tmp = *lst;
-	while (tmp->next)
+	i = 0;
+	while (tmp)
 	{
 		content = tmp->content;
 		while (*content)
 		{
 			if (*content == '\n')
 			{
-				ft_print_lst(lst);
-				return ;
+				result = (char *)malloc(sizeof(char) * (i + 1));
+				if (!result)
+					printf("I can't");
+				ft_ret_line(lst, result, i);
+				*lst = NULL;
+				return (result);
 			}
+			i++;
 			content++;
 		}
 		if (!tmp->next)
 			break ;
 		tmp = tmp->next;
 	}
+	return (NULL);
 }
 
 char	*get_next_line(int fd)
 {
 	char	buf[BUFFER_SIZE];
-	//char	*result;
+	char	*result;
 	static t_list	*lst = NULL;
 
+	result = NULL;
 	if (!ft_check_read(read(fd, buf, BUFFER_SIZE)))
 		return (NULL);
-	if (!lst)
-		printf("(lst = null)\n");
 	ft_gnl_lst(&lst, buf);
-	ft_check_newline(&lst);
-	return (NULL);
+	result = ft_check_newline(&lst, result);
+	return (result);
 }
