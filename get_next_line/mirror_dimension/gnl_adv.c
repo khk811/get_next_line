@@ -63,6 +63,14 @@ static void	ft_lst_print(t_list **lst)
 	}
 }
 
+static int	ft_check_read(int n)
+{
+	if (n == -1 || n == 0)
+		return (0);
+	else
+		return (1);
+}
+
 /*
 static t_list	*ft_check_newline(t_list **lst)
 {
@@ -89,10 +97,8 @@ char	*get_next_line(int fd)
 	char	buf[BUFFER_SIZE];
 	//char	*result;
 	static t_list	*lst = NULL;
-	int	read_int;
 
-	read_int = read(fd, buf, BUFFER_SIZE);
-	if (read_int == -1 || read_int == 0)
+	if (!ft_check_read(read(fd, buf, BUFFER_SIZE)))
 		return (NULL);
 	ft_gnl_lst(&lst, buf);
 	/*
