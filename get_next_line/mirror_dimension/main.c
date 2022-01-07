@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "gnl.h"
+#include "get_next_line.h"
 #include <fcntl.h>
 
 int	main()
@@ -9,13 +9,8 @@ int	main()
 	char	*result;
 
 	i = 0;
-	target_fd = open("./read_fd_target", O_RDONLY);
-	while (i++ < 10)
-	{
-		//printf("\n(%d)\n"s, i);
-		result = get_next_line(target_fd);
-		if (result)
-			printf("%s", result);
-	}
+	target_fd = open("./short_target", O_RDONLY);
+	result = get_next_line(target_fd);
+    printf("%s", result);
 	return (0);
 }
