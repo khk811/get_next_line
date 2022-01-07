@@ -1,90 +1,164 @@
 #include "gnl.h"
 #include <stdio.h>
 
-typedef struct  s_list
+static void	*ft_memcpy(void *dst, void *src, size_t n)
 {
-    void    *content;
-    struct s_list   *next;
-}   t_list;
+	size_t	i;
 
-static void ft_gnl_lst(t_list **lst, void *content)
-{
-    t_list  *new;
-
-    new = malloc(sizeof(t_list));
-    if (!new)
-        return ;
-    new->content = content;
-    new->next = NULL;
-    if (!*lst)
-    {
-        *lst = new;
-        return ;
-    }
-    while ((*lst)->next)
-        (*lst) = (*lst)->next;
-    (*lst)->next = new;
+	if (!dst && !src)
+		return (NULL);
+	i = 0;
+	while (i < n)
+	{
+		*(unsigned char *)(dst + i) = *(unsigned char *)(src + i);
+		i++;
+	}
+	return (dst);
 }
 
-static int  ft_count_char(t_list **lst)
+static t_list	*ft_lstlast(t_list *lst)
 {
-    int i;
-    char    *content;
+	while (lst)
+	{
+		if (!lst->next)
+			return (lst);
+		lst = lst->next;
+	}
+	return (NULL);
+}
 
-    i = 0;
-    while (*lst)
-    {
-        content = (*lst)->content;
-        while (*content)
-        {
-            if (*content == '\n')
-                break;
-            i++;
-            content++;
-        }
-		if (!(*lst)->next)
+static void	ft_gnl_lst(t_list **lst, void *content)
+{
+	t_list	*new;
+	t_list	*last;
+	char	*str;
+
+	new = malloc(sizeof(t_list));
+	str = (char *)malloc(sizeof(char) * (BUFFER_SIZE));
+	if (!new)
+		return ;
+	ft_memcpy(str, content, BUFFER_SIZE);
+	new->content = str;
+	new->next = NULL;
+	//printf("the new: %s\n", new->content);
+	if (!*lst)
+	{
+		*lst = new;
+		return ;
+	}
+	last = ft_lstlast(*lst);
+	last->next = new;
+}
+
+static int	ft_check_read(int n)
+{
+	if (n == -1 || n == 0)
+		return (0);
+	else
+		return (1);
+}
+
+static char	*ft_ret_line(t_list **lst, char *result, int len)
+{
+	int	i;
+	t_list	*tmp;
+	char	*content;
+
+	i = 0;
+	tmp = *lst;
+	while (tmp && i < len)
+	{
+		content = tmp->content;
+		while (*content)
+		{
+			if (*content == '\n')
+			{
+				result[i++] = *content;
+				break ;
+			}
+			result[i] = *content;
+			i++;
+			content++;
+		}
+		if (!tmp->next)
 			break ;
-        (*lst) = (*lst)->next;
-    }
-    return (i);
+		tmp = tmp->next;
+	}
+	result[i] = '\0';
+	return (result);
+}
+/*
+static void	ft_lst_print(t_list *lst)
+{
+	while (lst)
+	{
+		if (lst->content)
+			printf(">>>%s\n", lst->content);
+		lst = lst->next;
+	}
+}*/
+
+static void	ft_add_leftover(t_list **lst, t_list *element, char *str)
+{
+	if (*str)
+	{
+		(*lst) = element;
+		(*lst)->content = str;
+	}
+	else if (!*str)
+	{
+		if (!element->next)
+		{
+			*lst = NULL;
+			return ;
+		}
+		(*lst) = (*lst)->next;
+	}
 }
 
-static char *ft_ret_line(t_list **lst, char *arr, int len)
+static char *ft_check_newline(t_list **lst, char *result)
 {
-    int i;
-    char    *content;
-    
-    i = 0;
-    while (i < len)
-    {
-        content = (*lst)->content;
-        while (*content)
-        {
-            arr[i++] = *content;
-            content++;
-        }
-        (*lst) = (*lst)->next;
-    }
-    arr[i] = '\0';
-    return (arr);
-}
-
-char    *get_next_line(int fd)
-{
-    char    buf[BUFFER_SIZE];
-    char    *result;
-	static t_list	*lst = NULL;
-    int read_int;
+	t_list	*tmp;
+	char	*content;
 	int	i;
 
-    read_int = read(fd, buf, BUFFER_SIZE);
-    if (read_int == -1 || read_int == 0)
-        return (NULL);
-    ft_gnl_lst(&lst, buf);
-	i = ft_count_char(&lst);
-    result = (char *)malloc(sizeof(char) * (i + 1));
-    if (!result)
-        return (NULL);
-    ft_ret_line(&lst, result, i);
-    return (result);
+	tmp = *lst;
+	i = 0;
+	while (tmp)
+	{
+		content = tmp->content;
+		while (*content)
+		{
+			if (*content == '\n' || !*content)
+			{
+				result = (char *)malloc(sizeof(char) * (i + 3));
+				if (!result)
+					return (NULL);
+				result = ft_ret_line(lst, result, i);
+				ft_add_leftover(lst, tmp,++content);
+				return (result);
+			}
+			i++;
+			content++;
+		}
+		if (!tmp->next)
+			break ;
+		tmp = tmp->next;
+	}
+	return (NULL);
+}
+
+char	*get_next_line(int fd)
+{
+	char	buf[BUFFER_SIZE];
+	char	*result;
+	static t_list	*lst = NULL;
+
+	result = NULL;
+	if (!ft_check_read(read(fd, buf, BUFFER_SIZE)))
+		return (NULL);
+	ft_gnl_lst(&lst, buf);
+	result = ft_check_newline(&lst, result);
+	//ft_lst_print(&lst);
+	return (result);
 }
