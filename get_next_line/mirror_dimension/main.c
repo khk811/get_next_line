@@ -9,16 +9,13 @@ int	main()
 	char	*result;
 
 	i = 0;
-	target_fd = open("./short_target", O_RDONLY);
-	while (i++ < 20)
+	target_fd = open("./read_fd_target", O_RDONLY);
+	while (i++ < 10)
 	{
-		printf("\n(%d)\n", i);
+		//printf("\n(%d)\n"s, i);
 		result = get_next_line(target_fd);
 		if (result)
-		{
 			printf("%s", result);
-			printf("<<Thank U, Next>>\n");
-		}
 	}
 	return (0);
 }
