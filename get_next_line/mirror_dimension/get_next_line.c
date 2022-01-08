@@ -13,6 +13,23 @@ static char	*read_for_gnl(int fd, char **buf)
     return (*buf);
 }
 
+static void	check_newline(char *buf)
+{
+	int	i;
+
+	i = 0;
+	while (buf[i])
+	{
+		if (buf[i] == '\n')
+		{
+			printf("found newline in buf\n");
+			return ;
+		}
+		i++;
+	}
+	printf("newline undetected\n");
+}
+
 char *get_next_line(int fd)
 {
     //char    *result;
@@ -31,5 +48,6 @@ char *get_next_line(int fd)
         printf("read fail\n");
         return (NULL);
     }
+	check_newline(buf);
     return (buf);
 }
