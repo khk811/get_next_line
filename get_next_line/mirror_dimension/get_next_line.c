@@ -4,13 +4,12 @@
 static char	*read_for_gnl(int fd, char **buf)
 {
     int read_result;
-    char result[BUFFER_SIZE];
 
     read_result = 0;
-    read_result = read(fd, result, BUFFER_SIZE);
+	*buf = (char *)malloc(sizeof(char) * (BUFFER_SIZE));
+    read_result = read(fd, *buf, BUFFER_SIZE);
     if (read_result == 0 || read_result == -1)
         return (NULL);
-    *buf = result;
     return (*buf);
 }
 
@@ -26,8 +25,7 @@ char *get_next_line(int fd)
         printf("Buffer is too small\n");
         return (NULL);
     }
-	buf = read_for_gnl(fd, &buf);
-	printf("$$$%s\n", buf);
+	read_for_gnl(fd, &buf);
     if (!*buf)
     {
         printf("read fail\n");
