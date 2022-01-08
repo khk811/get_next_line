@@ -11,19 +11,21 @@ static int	ft_strlen(char *s)
 	return (i);
 }
 
-static void	*ft_memcpy(void *dst, void *src, int n)
+static char *ft_strncat(char *dst, char *src, int n)
 {
-	int	i;
+    int i;
+    int j;
 
-	if (!dst && !src)
-		return (NULL);
-	i = 0;
-	while (i < n)
-	{
-		*(unsigned char *)(dst + i) = *(unsigned char *)(src + i);
-		i++;
-	}
-	return (dst);
+    i = ft_strlen(dst);
+    j = 0;
+    while (src[j] && j < n)
+    {
+        dst[i] = src[j];
+        i++;
+        j++;
+    }
+    dst[i] = '\0';
+    return (dst);
 }
 
 static char	*read_for_gnl(int fd, char **buf)
@@ -43,12 +45,12 @@ static int	cnt_wo_head(t_list **lst)
 	t_list	*tmp;
 	int	i;
 
-	i = 0;
-	tmp = (*lst)->next;
-	while (tmp)
+    i = 0;
+    tmp = *lst;
+	while (tmp->next)
 	{
-		i++;
 		tmp = tmp->next;
+        i++;
 	}
 	return (i);
 }
@@ -62,18 +64,17 @@ static char	*line_return(t_list **lst, char **result, char *tail)
 	tmp = *lst;
 	total_len = ft_strlen(tmp->content) + ft_strlen(tail);
 	if (tmp->next)
-		total_len += cnt_wo_head(lst);
-	*result = (char *)malloc(sizeof(char) * total_len);
+		total_len += (cnt_wo_head(lst) * BUFFER_SIZE);
+	*result = (char *)malloc(sizeof(char) * (total_len + 1));
 	if (!*result)
 		return (NULL);
 	i = 0;
 	while (tmp)
 	{
-		ft_memcpy(*(result + i), tmp->content, ft_strlen(tmp->content));
-		i += ft_strlen(tmp->content);
+		ft_strncat(*result, tmp->content, ft_strlen(tmp->content) + 1);
 		tmp = tmp->next;
 	}
-	ft_memcpy(*(result + i), tail, ft_strlen(tail));
+	ft_strncat(*result, tail, ft_strlen(tail) + 1);
 	return (*result);
 }
 
@@ -85,8 +86,8 @@ static t_list	*create_element(char *content)
 	new = malloc(sizeof(t_list));
 	if (!new)
 		return (NULL);
-	new_content = (char *)malloc(sizeof(char) * ft_strlen(content));
-	ft_memcpy(new_content, content, ft_strlen(content));
+	new_content = (char *)malloc(sizeof(char) * (ft_strlen(content) + 1));
+	ft_strncat(new_content, content, ft_strlen(content) + 1);
 	new->content = new_content;
 	new->next = NULL;
 	return (new);
@@ -101,16 +102,21 @@ void	add_element(t_list **lst, t_list *new)
 		*lst = new;
 	else
 	{
-		while (tmp)
-		{
-			if (!tmp->next)
-			{
-				new = tmp->next;
-				return ;
-			}
-			tmp = tmp->next;
-		}
+		while (tmp->next)
+            tmp = tmp->next;
+        tmp->next = new;
 	}
+}
+static void ft_lstclear(t_list **lst)
+{
+    t_list  *next_element;
+
+    while (*lst)
+    {
+        next_element = (*lst)->next;
+        free((*lst)->content);
+        *lst = next_element;
+    }
 }
 
 static char	*check_newline(char *buf, t_list **lst, char *result)
@@ -125,9 +131,10 @@ static char	*check_newline(char *buf, t_list **lst, char *result)
 		if (buf[i] == '\n')
 		{
 			tail = (char *)malloc(sizeof(char) * i);
-			line_return(lst, &result, ft_memcpy(tail, buf, i));
+			line_return(lst, &result, ft_strncat(tail, buf,  i + 1));
+            ft_lstclear(lst);
 			if (buf[i + 1])
-				add_element(lst, create_element(buf + i));
+				add_element(lst, create_element(buf + i + 1));
 			return (result);
 		}
 		i++;
@@ -140,10 +147,9 @@ char *get_next_line(int fd)
 {
     char    *result;
     char    *buf;
-	static t_list	*lst;
+	static t_list	*lst = NULL;
 
     buf = NULL;
-	lst = NULL;
     result = NULL;
     if (BUFFER_SIZE <= 0)
         return (NULL);

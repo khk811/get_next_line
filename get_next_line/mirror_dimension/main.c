@@ -6,8 +6,11 @@
 int	main()
 {
 	int	target_fd;
+	int	i;
 
-	target_fd = open("./short_target", O_RDONLY);
-	printf("gnl result: %s", get_next_line(target_fd));
+	i = 0;
+	target_fd = open("./read_fd_target", O_RDONLY);
+	while (i++ < 19)
+		printf("gnl result: %s", get_next_line(target_fd));
 	return (0);
 }
