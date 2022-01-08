@@ -6,11 +6,9 @@ int	main()
 {
 	int	target_fd;
 	int	i;
-	char	*result;
 
 	i = 0;
 	target_fd = open("./short_target", O_RDONLY);
-	result = get_next_line(target_fd);
-    printf("%s", result);
+	printf("gnl result: %s", get_next_line(target_fd));
 	return (0);
 }

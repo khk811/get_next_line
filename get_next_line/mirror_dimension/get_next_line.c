@@ -38,6 +38,15 @@ static char	*read_for_gnl(int fd, char **buf)
     return (*buf);
 }
 
+static void line_return(t_list **lst, char *result, char *tail)
+{
+	t_list	*tmp;
+
+
+	tmp = *lst;
+	return (result);
+}
+
 static t_list	*create_element(char *content)
 {
 	t_list	*new;
@@ -68,39 +77,40 @@ static void	add_element(t_list **lst, t_list *new)
 	}
 }
 
-static void	check_newline(char *buf, t_list **lst)
+static void	check_newline(char *buf, t_list **lst, char *result)
 {
 	int	i;
+	char	*tail;
 
 	i = 0;
 	while (buf[i])
 	{
 		if (buf[i] == '\n')
 		{
-			printf("found newline in buf\n");
-			return ;
+			line_return(lst, result, ft_memcpy(tail, buf, i));
+			if (buf[i + 1])
+				add_element(lst, create_element(buf + i);
+			return (result);
 		}
 		i++;
 	}
-	printf("newline undetected\n");
 	add_element(lst, create_element(buf));
+	return (NULL);
 }
 
 char *get_next_line(int fd)
 {
-    //char    *result;
+    char    *result;
     char    *buf;
 	static t_list	*lst;
 
     buf = NULL;
 	lst = NULL;
-    //result = NULL;
+    result = NULL;
     if (BUFFER_SIZE <= 0)
         return (NULL);
 	if (!read_for_gnl(fd, &buf))
 		return (NULL);
 	check_newline(buf, &lst);
-	if (lst)
-		printf("head content: %s\n", lst->content);
     return (buf);
 }
