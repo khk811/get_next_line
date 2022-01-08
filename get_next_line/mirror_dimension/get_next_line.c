@@ -1,7 +1,7 @@
 #include "get_next_line.h"
 #include <stdio.h>
 
-static int read_for_gnl(int fd, char **buf)
+static char	*read_for_gnl(int fd, char **buf)
 {
     int read_result;
     char result[BUFFER_SIZE];
@@ -9,10 +9,9 @@ static int read_for_gnl(int fd, char **buf)
     read_result = 0;
     read_result = read(fd, result, BUFFER_SIZE);
     if (read_result == 0 || read_result == -1)
-        return (0);
+        return (NULL);
     *buf = result;
-    //printf(">>%s\n", *buf);
-    return (1);
+    return (*buf);
 }
 
 char *get_next_line(int fd)
@@ -22,17 +21,17 @@ char *get_next_line(int fd)
 
     buf = NULL;
     //result = NULL;
-    if (BUFFER_SIZE < 0)
+    if (BUFFER_SIZE <= 0)
     {
         printf("Buffer is too small\n");
         return (NULL);
     }
-    if (!read_for_gnl(fd, &buf))
+	buf = read_for_gnl(fd, &buf);
+	printf("$$$%s\n", buf);
+    if (!*buf)
     {
         printf("read fail\n");
         return (NULL);
     }
-    if (!buf)
-        printf("can't write to buf\n");
     return (buf);
 }
