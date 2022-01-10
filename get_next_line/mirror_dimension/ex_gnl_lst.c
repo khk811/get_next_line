@@ -73,9 +73,10 @@ static char	*line_return(t_list **lst, char **result, t_list *last)
 		tmp = tmp->next;
 	}
 	tmp = *lst;
-	while (tmp->next && tmp->fd == last->fd)
+	while (tmp->next)
 	{
-		total_len += ft_strlen(tmp->content);
+		if (tmp->fd == last->fd)
+			total_len += ft_strlen(tmp->content);
 		tmp = tmp->next;
 	}
 	total_len += ft_strlen(last->content);
@@ -83,9 +84,10 @@ static char	*line_return(t_list **lst, char **result, t_list *last)
 	if (!result)
 		return (NULL);
 	tmp = *lst;
-	while (tmp->next && tmp->fd == last->fd)
+	while (tmp->next)
 	{
-		ft_strcat(&result, tmp->content);
+		if (tmp->fd == last->fd)
+			ft_strcat(&result, tmp->content);
 		tmp = tmp->next;
 	}
 	return (result);
