@@ -9,7 +9,10 @@ static char	*read_for_gnl(int fd, char **buf)
 	*buf = (char *)malloc(sizeof(char) * (BUFFER_SIZE));
 	read_result = read(fd, *buf, BUFFER_SIZE);
 	if (read_result == 0 || read_result == -1)
+	{
+		free(*buf);
 		return (NULL);
+	}
 	return (*buf);
 }
 
@@ -64,13 +67,14 @@ static char	*check_newline(char *buf, t_list **lst, char *result)
 	tail = NULL;
 	while (buf[i])
 	{
-		if (buf[i] == '\n')
+		if (buf[i] == '\n' || buf[i] == '\0')
 		{
 			tail = (char *)malloc(sizeof(char) * i);
 			line_return(lst, &result, ft_strncat(tail, buf, i + 1));
 			ft_lstclear(lst);
 			if (buf[i + 1])
 				add_element(lst, create_element(buf + i + 1));
+			free(tail);
 			return (result);
 		}
 		i++;

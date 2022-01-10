@@ -12,19 +12,21 @@ int	ft_strlen(char *s)
 
 char *ft_strncat(char *dst, char *src, int n)
 {
-    int i;
-    int j;
+	int i;
+	int j;
 
-    i = ft_strlen(dst);
-    j = 0;
-    while (src[j] && j < n)
-    {
-        dst[i] = src[j];
-        i++;
-        j++;
-    }
-    dst[i] = '\0';
-    return (dst);
+	i = ft_strlen(dst);
+	j = 0;
+	while (src[j] && j < n)
+	{
+		dst[i] = src[j];
+		if (!src[j])
+			return (dst);
+		i++;
+		j++;
+	}
+	dst[i] = '\0';
+	return (dst);
 }
 
 int	cnt_wo_head(t_list **lst)
@@ -32,8 +34,8 @@ int	cnt_wo_head(t_list **lst)
 	t_list	*tmp;
 	int	i;
 
-    i = 0;
-    tmp = *lst;
+	i = 0;
+	tmp = *lst;
 	while (tmp->next)
 	{
 		tmp = tmp->next;
@@ -67,19 +69,19 @@ void	add_element(t_list **lst, t_list *new)
 	else
 	{
 		while (tmp->next)
-            tmp = tmp->next;
-        tmp->next = new;
+		    tmp = tmp->next;
+		tmp->next = new;
 	}
 }
 
 void ft_lstclear(t_list **lst)
 {
-    t_list  *next_element;
+	t_list  *next_element;
 
-    while (*lst)
-    {
-        next_element = (*lst)->next;
-        free((*lst)->content);
-        *lst = next_element;
-    }
+	while (*lst)
+	{
+		next_element = (*lst)->next;
+		free((*lst)->content);
+		*lst = next_element;
+	}
 }
