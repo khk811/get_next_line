@@ -100,5 +100,7 @@ char	*get_next_line(int fd)
 		result = check_newline(buf, &lst, result);
 	}
 	free(buf);
+	buf = NULL;
+	//dangling ptr 방지. - 가비지 콜렉터가 없어서 이런식으로 선언해줘야 함.
 	return (result);
 }
