@@ -1,4 +1,4 @@
-#include "get_next_line.h"
+#include "ex_gnl_lst.h"
 #include <stdio.h>
 
 static int	ft_strlen(char *s)
@@ -11,14 +11,14 @@ static int	ft_strlen(char *s)
 	return (i);
 }
 
-static char	*ft_strcat(char *dst, char *src)
+static char	*ft_strncat(char *dst, char *src, int size)
 {
 	int	i;
 	int	j;
 
 	i = ft_strlen(dst);
 	j = 0;
-	while (src[j])
+	while (src[j] && j < size)
 	{
 		dst[i] = src[j];
 		i++;
@@ -28,16 +28,15 @@ static char	*ft_strcat(char *dst, char *src)
 	return (dst);
 }
 
-static t_list	create_element(int fd, int nl_eof, char *content);
+static t_list	*create_element(int fd, int nl_eof, char *content)
 {
 	t_list	*new;
-	char	*new_content;
 
 	new = malloc(sizeof(t_list));
 	if (!new)
 		return (NULL);
 	new->content = (char *)malloc(sizeof(char) * ft_strlen(content) + 1);
-	ft_strcat(new_content, content);
+	ft_strncat(new->content, content, ft_strlen(content));
 	new->fd = fd;
 	new->nl_eof = nl_eof;
 	new->next = NULL;
@@ -59,6 +58,24 @@ static void	add_element(t_list **lst, t_list *new)
 	}
 }
 
+static void	ft_lstclear(t_list **lst, t_list *last)
+{
+	t_list	*tmp;
+	t_list	*next_element;
+
+	tmp = *lst;
+	while (tmp->next)
+	{
+		next_element = tmp->next;
+		if (tmp->fd == last->fd)
+		{
+			free(tmp->content);
+			free(tmp);
+		}
+		tmp = next_element;
+	}
+}
+
 static char	*line_return(t_list **lst, char **result, t_list *last)
 {
 	t_list	*tmp;
@@ -68,17 +85,11 @@ static char	*line_return(t_list **lst, char **result, t_list *last)
 	total_len = 0;
 	while (tmp->next)
 	{
-		if (tmp->fd == last->fd)
-			break ;
-		tmp = tmp->next;
-	}
-	tmp = *lst;
-	while (tmp->next)
-	{
-		if (tmp->fd == last->fd)
+		if (tmp->fd == last->fd && tmp->nl_eof != 1)
 			total_len += ft_strlen(tmp->content);
 		tmp = tmp->next;
 	}
+	printf("the last content: %s", last->content);
 	total_len += ft_strlen(last->content);
 	*result = (char *)malloc(sizeof(char) * (total_len  + 1));
 	if (!result)
@@ -86,50 +97,74 @@ static char	*line_return(t_list **lst, char **result, t_list *last)
 	tmp = *lst;
 	while (tmp->next)
 	{
-		if (tmp->fd == last->fd)
-			ft_strcat(&result, tmp->content);
+		if (tmp->fd == last->fd && tmp->nl_eof != 1)
+			ft_strncat(*result, tmp->content, ft_strlen(tmp->content));
 		tmp = tmp->next;
 	}
-	return (result);
+	ft_strncat(*result, tmp->content, ft_strlen(tmp->content));
+	ft_lstclear(lst, last);
+	return (*result);
 }
 
-static void	check_nl_eof()
+static int	check_nl_eof(int fd, int nl_eof, char **buf, t_list **lst)
 {
 	char	*buf_w_nl;
+	int	is_nl_eof;
+	int	i;
+	int	j;
 
+	i = 0;
+	j = 0;
+	is_nl_eof = 0;
+	while (*(*(buf) + i))
+	{
+		if (*(*(buf) + i) == '\n')
+		{
+			if (!(buf_w_nl = (char *)malloc(sizeof(char) * (i - j + 2))))
+				return (0);
+			ft_strncat(buf_w_nl, *(buf) + j + is_nl_eof, i - j + 1 - is_nl_eof);
+			add_element(lst, create_element(fd, 1, buf_w_nl));
+			free(buf_w_nl);
+			j = i;
+			is_nl_eof = 1;
+		}
+		i++;
+	}
+	add_element(lst, create_element(fd, nl_eof, *(buf) + j + is_nl_eof));
+	return(is_nl_eof);
 }
 
-static void	read_for_gnl(int fd, char **buf, t_list **lst)
+static void	find_last(t_list **last)
+{
+	if (!last)
+		return ;
+	else if (!*last)
+		return ;
+	//printf("*last->content: %s\n", (*last)->content);
+	while ((*last)->next && (*last)->nl_eof != 1)
+		(*last) = (*last)->next;
+}
+
+static char	*read_for_gnl(int fd, char **buf, t_list **lst, char **result)
 {
 	int	read_result;
 	int	nl_eof;
-	char	*buf_w_nl;
-	int	i;
+	t_list	*last;
 
 	nl_eof = 0;
 	*buf = (char *)malloc(sizeof(char) * BUFFER_SIZE);
 	read_result = read(fd, *buf, BUFFER_SIZE);
 	if (read_result == 0 || read_result == -1)
-	{
-		free(*buf);
 		return (NULL);
-	}
-	if (read(fd, *buf, BUFFER_SIZE) < BUFFER_SIZE)
+	if (read_result < BUFFER_SIZE)
 		nl_eof = 1;
-	while (buf[i])
+	if (check_nl_eof(fd, nl_eof, buf, lst))
 	{
-		if (buf[i])
-		{
-			nl_eof = 1;
-			ft_strcat(buf_w_nl, buf);
-			add_element(lst, create_element(fd, nl_eof, buf));
-			//add newline element.
-			break ;
-		}
-		i++;
+		last = *lst;
+		find_last(&last);
+		line_return(lst, result, last);
 	}
-	//add leftover element
-	//need to separate - func.
+	return (*result);
 }
 
 char	*get_next_line(int fd)
@@ -143,6 +178,8 @@ char	*get_next_line(int fd)
 	if (BUFFER_SIZE <= 0)
 		return (result);
 	while (!result)
-	{
-	}
+		read_for_gnl(fd, &buf, &lst, &result);
+	free(buf);
+	buf = NULL;
+	return (result);
 }
