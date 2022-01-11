@@ -49,7 +49,10 @@ static void	add_element(t_list **lst, t_list *new)
 
 	tmp = *lst;
 	if (!*lst)
+	{
 		*lst = new;
+		return ;
+	}
 	else
 	{
 		while (tmp->next)
@@ -62,18 +65,23 @@ static void	ft_lstclear(t_list **lst, t_list *last)
 {
 	t_list	*tmp;
 	t_list	*next_element;
+	t_list	*diff_fd;
 
 	tmp = *lst;
-	while (tmp->next)
+	diff_fd = NULL;
+	while (tmp->next && tmp != last)
 	{
+		if (tmp->fd != last->fd)
+			diff_fd = tmp;
 		next_element = tmp->next;
 		if (tmp->fd == last->fd)
 		{
 			free(tmp->content);
-			free(tmp);
 		}
 		tmp = next_element;
 	}
+	printf("before free: %s\n", tmp->content);
+	free(tmp->content);
 }
 
 static char	*line_return(t_list **lst, char **result, t_list *last)
@@ -83,19 +91,18 @@ static char	*line_return(t_list **lst, char **result, t_list *last)
 
 	tmp = *lst;
 	total_len = 0;
-	while (tmp->next)
+	while (tmp->next && tmp->nl_eof != 1)
 	{
 		if (tmp->fd == last->fd && tmp->nl_eof != 1)
 			total_len += ft_strlen(tmp->content);
 		tmp = tmp->next;
 	}
-	printf("the last content: %s", last->content);
 	total_len += ft_strlen(last->content);
 	*result = (char *)malloc(sizeof(char) * (total_len  + 1));
 	if (!result)
 		return (NULL);
 	tmp = *lst;
-	while (tmp->next)
+	while (tmp->next && tmp->nl_eof != 1)
 	{
 		if (tmp->fd == last->fd && tmp->nl_eof != 1)
 			ft_strncat(*result, tmp->content, ft_strlen(tmp->content));
@@ -124,6 +131,7 @@ static int	check_nl_eof(int fd, int nl_eof, char **buf, t_list **lst)
 				return (0);
 			ft_strncat(buf_w_nl, *(buf) + j + is_nl_eof, i - j + 1 - is_nl_eof);
 			add_element(lst, create_element(fd, 1, buf_w_nl));
+			buf_w_nl = NULL;
 			free(buf_w_nl);
 			j = i;
 			is_nl_eof = 1;
@@ -181,5 +189,7 @@ char	*get_next_line(int fd)
 		read_for_gnl(fd, &buf, &lst, &result);
 	free(buf);
 	buf = NULL;
+	if (lst)
+		printf("lst content: %s\n", lst->content);
 	return (result);
 }
