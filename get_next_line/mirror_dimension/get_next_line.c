@@ -3,6 +3,21 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+static char	*alloc_arr(char **arr, int size)
+{
+	if (*arr)
+	{
+		*arr = (char *)malloc(sizeof(char) * (size + 1));
+		if (!*arr)
+			return (NULL);
+	}
+	/*
+	else if (arr)
+	{
+	}*/
+	return (*arr);
+}
+
 static int	has_a_nl(char *s)
 {
 	int	i;
@@ -21,7 +36,7 @@ static int	valid_read(int fd, char **buf)
 {
 	if (BUFFER_SIZE <= 0 || fd < 0)
 		return (0);
-	if (!(*buf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1))))
+	if (!alloc_arr(buf, BUFFER_SIZE))
 		return (0);
 	if (read(fd, *buf,BUFFER_SIZE) <= 0)
 		return (0);
