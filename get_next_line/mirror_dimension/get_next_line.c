@@ -62,10 +62,8 @@ static char	*cat_a_line(char *dst, char *src, int flag)
 static char	*alloc_arr(char **arr, int size)
 {
 	char	*tmp;
-	int	new_size;
 
 	tmp = NULL;
-	new_size = 0;
 	if (!*arr)
 	{
 		*arr = (char *)malloc(sizeof(char) * (size + 1));
@@ -78,19 +76,28 @@ static char	*alloc_arr(char **arr, int size)
 		if (!tmp)
 			return (NULL);
 		cat_a_line(tmp, *arr, 0);
-		new_size = ft_strlen(tmp) + ft_strlen(*arr);
-		*arr = (char *)malloc(sizeof(char) * (new_size + 1));
+		*arr = (char *)malloc(sizeof(char) * (ft_strlen(tmp) + size + 1));
 		if (!*arr)
 			return (NULL);
 		cat_a_line(*arr, tmp, 0);
 		ft_memset(tmp, 0, ft_strlen(tmp) + 1);
 		free(tmp);
+		tmp = NULL;
 	}
 	return (*arr);
 }
 
-static int	valid_read(int fd, char **buf)
+static int	valid_read(int fd, char **buf, char **save)
 {
+	if (*save)
+	{
+		if (alloc_arr(buf, ft_strlen(*save)))
+			cat_a_line(*buf, *save, 0);
+		ft_memset(*save, 0, ft_strlen(*save) + 1);
+		free(*save);
+		*save = NULL;
+		return (1);
+	}
 	if (BUFFER_SIZE <= 0 || fd < 0)
 		return (0);
 	if (!alloc_arr(buf, BUFFER_SIZE))
@@ -106,23 +113,32 @@ char	*get_next_line(int fd)
 	char	*buf;
 	char	*result;
 	static char	*save = NULL;
+	int	the_nl;
 
 	result = NULL;
 	buf = NULL;
-	if (!valid_read(fd, &buf))
+	the_nl = 0;
+	if (!valid_read(fd, &buf, &save))
 		return (NULL);
-	while (!has_a_nl(buf))
+	while (!(the_nl = has_a_nl(buf)))
 	{
 		if (alloc_arr(&result, ft_strlen(buf)))
 			cat_a_line(result, buf, 0);
-		valid_read(fd, &buf);
+		ft_memset(buf, 0, ft_strlen(buf) + 1);
+		free(buf);
+		buf = NULL;
+		valid_read(fd, &buf, &save);
 	}
-	if (alloc_arr(&result, ft_strlen(buf)))
+	if (alloc_arr(&result, the_nl))
 		cat_a_line(result, buf, 1);
-	buf += has_a_nl(buf);
-	if (alloc_arr(&save, ft_strlen(buf)))
-		cat_a_line(save, buf, 0);
-	printf("save: %s\n", save);
+	if (buf[the_nl])
+	{
+		if (alloc_arr(&save, ft_strlen(buf + the_nl)))
+			cat_a_line(save, buf + the_nl, 0);
+	}
+	ft_memset(buf, 0, ft_strlen(buf) + 1);
+	free(buf);
+	buf = NULL;
 	return (result);
 }
 
@@ -130,10 +146,17 @@ int	main()
 {
 	int	target_fd;
 	char	*a_line;
+	int	i;
 
 	target_fd = open("./test/brouette.txt", O_RDONLY);
 	a_line = get_next_line(target_fd);
-	printf("%s\n", a_line);
-	free(a_line);
+	i = 0;
+	while (i < 10)
+	{
+		printf("%s", a_line);
+		a_line = get_next_line(target_fd);
+		i++;
+	}
+	//free(a_line);
 	return (0);
 }
