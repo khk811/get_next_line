@@ -13,19 +13,14 @@ static int	ft_strlen(char *s)
 	return (i);
 }
 
-static char	*alloc_arr(char **arr, int size)
+static void	*ft_memset(void *b, int c, int len)
 {
-	if (!*arr)
-	{
-		*arr = (char *)malloc(sizeof(char) * (size + 1));
-		if (!*arr)
-			return (NULL);
-	}
-	/*
-	else if (*arr)
-	{
-	}*/
-	return (*arr);
+	int	i;
+
+	i = 0;
+	while (i < len)
+		*(unsigned char *)(b + (i++)) = (unsigned char)c;
+	return ((void *)b);
 }
 
 static int	has_a_nl(char *s)
@@ -64,6 +59,36 @@ static char	*cat_a_line(char *dst, char *src, int flag)
 	return (dst);
 }
 
+static char	*alloc_arr(char **arr, int size)
+{
+	char	*tmp;
+	int	new_size;
+
+	tmp = NULL;
+	new_size = 0;
+	if (!*arr)
+	{
+		*arr = (char *)malloc(sizeof(char) * (size + 1));
+		if (!*arr)
+			return (NULL);
+	}
+	else if (*arr && size > 0)
+	{
+		tmp = (char *)malloc(sizeof(char) * (ft_strlen(*arr) + 1));
+		if (!tmp)
+			return (NULL);
+		cat_a_line(tmp, *arr, 0);
+		new_size = ft_strlen(tmp) + ft_strlen(*arr);
+		*arr = (char *)malloc(sizeof(char) * (new_size + 1));
+		if (!*arr)
+			return (NULL);
+		cat_a_line(*arr, tmp, 0);
+		ft_memset(tmp, 0, ft_strlen(tmp) + 1);
+		free(tmp);
+	}
+	return (*arr);
+}
+
 static int	valid_read(int fd, char **buf)
 {
 	if (BUFFER_SIZE <= 0 || fd < 0)
@@ -86,17 +111,12 @@ char	*get_next_line(int fd)
 	buf = NULL;
 	if (!valid_read(fd, &buf))
 		return (NULL);
-	alloc_arr(&result, ft_strlen(buf));
-	result[ft_strlen(buf)] = '\0';
-	cat_a_line(result, buf, 0);
-	has_a_nl(buf);
-	/*
 	while (!has_a_nl(buf))
 	{
-		alloc_arr(result, ft_strlen(buf));
-		cat_a_line(result, buf, 0);
+		if (alloc_arr(&result, ft_strlen(buf)))
+			cat_a_line(result, buf, 0);
 		valid_read(fd, &buf);
-	}*/
+	}
 	return (result);
 }
 
