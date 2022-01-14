@@ -1,7 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
+#include "get_next_line.h"
 
 static int	ft_strlen(char *s)
 {
@@ -66,14 +63,12 @@ static char	*alloc_arr(char **arr, int size)
 	tmp = NULL;
 	if (!*arr)
 	{
-		*arr = (char *)malloc(sizeof(char) * (size + 1));
-		if (!*arr)
+		if(!(*arr = (char *)malloc(sizeof(char) * (size + 1))))
 			return (NULL);
 	}
 	else if (*arr && size > 0)
 	{
-		tmp = (char *)malloc(sizeof(char) * (ft_strlen(*arr) + 1));
-		if (!tmp)
+		if (!(tmp = (char *)malloc(sizeof(char) * (ft_strlen(*arr) + 1))))
 			return (NULL);
 		cat_a_line(tmp, *arr, 0);
 		*arr = (char *)malloc(sizeof(char) * (ft_strlen(tmp) + size + 1));
@@ -140,23 +135,4 @@ char	*get_next_line(int fd)
 	free(buf);
 	buf = NULL;
 	return (result);
-}
-
-int	main()
-{
-	int	target_fd;
-	char	*a_line;
-	int	i;
-
-	target_fd = open("./test/brouette.txt", O_RDONLY);
-	a_line = get_next_line(target_fd);
-	i = 0;
-	while (i < 10)
-	{
-		printf("%s", a_line);
-		a_line = get_next_line(target_fd);
-		i++;
-	}
-	//free(a_line);
-	return (0);
 }
