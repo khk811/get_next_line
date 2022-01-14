@@ -3,6 +3,20 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+static int	has_a_nl(char *s)
+{
+	int	i;
+
+	i = 0;
+	while (s[i])
+	{
+		if (s[i] == '\n')
+			return (i + 1);
+		i++;
+	}
+	return (0);
+}
+
 static int	valid_read(int fd, char **buf)
 {
 	if (BUFFER_SIZE <= 0 || fd < 0)
@@ -23,6 +37,8 @@ char	*get_next_line(int fd)
 
 	if (!valid_read(fd, &buf))
 		return (NULL);
+	while (!has_a_nl(buf))
+		valid_read(fd, &buf);
 	return (buf);
 }
 
