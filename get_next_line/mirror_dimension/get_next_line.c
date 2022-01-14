@@ -105,7 +105,7 @@ char	*get_next_line(int fd)
 {
 	char	*buf;
 	char	*result;
-	//static char	*save;
+	static char	*save = NULL;
 
 	result = NULL;
 	buf = NULL;
@@ -117,6 +117,12 @@ char	*get_next_line(int fd)
 			cat_a_line(result, buf, 0);
 		valid_read(fd, &buf);
 	}
+	if (alloc_arr(&result, ft_strlen(buf)))
+		cat_a_line(result, buf, 1);
+	buf += has_a_nl(buf);
+	if (alloc_arr(&save, ft_strlen(buf)))
+		cat_a_line(save, buf, 0);
+	printf("save: %s\n", save);
 	return (result);
 }
 
