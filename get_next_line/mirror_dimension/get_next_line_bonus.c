@@ -1,4 +1,5 @@
 #include "get_next_line_bonus.h"
+#include <stdio.h>
 
 static char	*read_until(char **buf, char **result)
 {
@@ -27,96 +28,94 @@ static char	*read_until(char **buf, char **result)
 	return (NULL);
 }
 
-static t_list	*handling_fd(int fd, t_list **lst)
+static t_list	*find_fd(int fd, t_list **lst)
 {
-	t_list	*tmp;
-
-	tmp = *lst;
-	if (!tmp)
-		tmp = create_element(fd);
-	else if (tmp)
+	if (!*lst)
 	{
-		while (tmp->next)
-		{
-			if (tmp->fd == fd)
-				break ;
-			tmp = tmp->next;
-		}
+		*lst = create_element(fd);
+		return (*lst);
 	}
-	else if (tmp->fd != fd)
+	while ((*lst)->next)
 	{
-		tmp->next = create_element(fd);
-		tmp = tmp->next;
-	}
-	return (tmp);
-}
-static void	free_element(int fd, t_list **lst)
-{
-	t_list	*tmp;
-
-	tmp = *lst;
-	while (tmp->next)
-	{
-		if (tmp->fd == fd && tmp->buf)
-		{
-			ft_memset(tmp->buf, 0, ft_strlen(tmp->buf) + 1);
-			free(tmp->buf);
-			tmp->buf = NULL;
+		if ((*lst)->fd == fd)
 			break ;
-		}
-		tmp = tmp->next;
+		*lst = (*lst)->next;
 	}
-	if (tmp)
+	if ((*lst)->fd != fd)
 	{
-		ft_memset(tmp->buf, 0, ft_strlen(tmp->buf) + 1);
-		free(tmp->buf);
+		(*lst)->next = create_element(fd);
+		*lst = (*lst)->next;
 	}
-	tmp->buf = NULL;
-	free(tmp);
-	tmp = NULL;
+	return (*lst);
 }
 
-static t_list	*valid_read(int fd, t_list **lst)
+static void	 rm_element(t_list **lst, int fd)
+{
+	t_list	*before;
+
+	before = NULL;
+	if (!*lst)
+		return ;
+	while (*lst)
+	{
+		if ((*lst)->fd != fd)
+			before = *lst;
+		if ((*lst)->fd == fd)
+			break ;
+		*lst = (*lst)->next;
+	}
+	if (before)
+		before->next = (*lst)->next;
+	free(*lst);
+	*lst = NULL;
+}
+
+static int	valid_read(int fd, char **buf, t_list **lst)
 {
 	int	read_result;
-	t_list	*ret;
 
 	if (BUFFER_SIZE <= 0 || fd < 0)
-		return (NULL);
-	ret = handling_fd(fd, lst);
-	if (!ret && !(alloc_arr(&(ret->buf), BUFFER_SIZE)))
-		return (NULL);
-	read_result = read(fd, ret->buf, BUFFER_SIZE);
+		return (0);
+	if (!*buf)
+	{
+		if (!alloc_arr(buf, BUFFER_SIZE))
+			return (0);
+	}
+	else if (*buf)
+		ft_memset(*buf, 0, ft_strlen(*buf) + 1);
+	read_result = read(fd, *buf, BUFFER_SIZE);
 	if (read_result <= 0)
 	{
-		if (ret)
-			free_element(fd, lst);
-		lst = NULL;
-		return (NULL);
+		if (*buf)
+			free(*buf);
+		*buf = NULL;
+		rm_element(lst, fd);
+		return (0);
 	}
-	(ret->buf)[read_result] = '\0';
-	return (ret);
+	(*buf)[read_result] = '\0';
+	return (1);
 }
 
 char	*get_next_line(int fd)
 {
-	static t_list	*fd_lst = NULL;
-	       t_list	*the_fd;
-	         char	*result;
+	static t_list	*buf = NULL;
+	char	*result;
+	t_list	*the_fd;
 
 	result = NULL;
-	the_fd = valid_read(fd, &fd_lst);
-	if (the_fd && !(the_fd->buf))
-		the_fd = valid_read(fd, &fd_lst);
-	while (the_fd || (the_fd->buf))
+	the_fd = find_fd(fd, &buf);
+	if (the_fd)
 	{
-		if (!alloc_arr(&result, ft_strlen((the_fd->buf))))
+		if (!(the_fd->buf)) 
+			valid_read(fd, &(the_fd->buf), &buf);
+	}
+	while (the_fd && (the_fd->buf))
+	{
+		if (!alloc_arr(&result, ft_strlen(the_fd->buf)))
 			break ;
 		if (read_until(&(the_fd->buf), &result))
 			return (result);
-		the_fd = valid_read(fd, &fd_lst);
+		valid_read(fd, &(the_fd->buf), &buf);
 	}
-	if (!the_fd && result)
-		free_element(fd, &fd_lst);
 	return (result);
 }
