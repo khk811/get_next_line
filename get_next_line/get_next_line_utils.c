@@ -6,7 +6,7 @@
 /*   By: hyunkkim <hyunkkim@student.42seoul.>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/20 14:32:17 by hyunkkim          #+#    #+#             */
-/*   Updated: 2022/01/20 14:57:39 by hyunkkim         ###   ########.fr       */
+/*   Updated: 2022/01/20 18:47:34 by hyunkkim         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,15 +70,13 @@ char	*alloc_arr(char **arr, int size)
 		tmp_len = ft_strlen(tmp);
 	}
 	*arr = (char *)malloc(sizeof(char) * (tmp_len + size + 1));
-	if (!*arr)
-		return (NULL);
-	ft_memset(*arr, 0, tmp_len + size + 1);
-	if (tmp != NULL)
-	{
+	if (*arr)
+		ft_memset(*arr, 0, tmp_len + size + 1);
+	if (*arr && tmp)
 		ft_memmove(*arr, tmp, tmp_len + 1);
+	if (tmp)
 		free(tmp);
-		tmp = NULL;
-	}
+	tmp = NULL;
 	return (*arr);
 }
 

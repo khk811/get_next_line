@@ -6,7 +6,7 @@
 /*   By: hyunkkim <hyunkkim@student.42seoul.>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/20 14:32:12 by hyunkkim          #+#    #+#             */
-/*   Updated: 2022/01/20 14:57:35 by hyunkkim         ###   ########.fr       */
+/*   Updated: 2022/01/20 20:23:03 by hyunkkim         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,7 @@ static void	rm_element(t_list **lst, int fd)
 	tmp = NULL;
 }
 
-static void	add_new_element(t_list **lst, int fd, char *buf)
+static int	add_new_element(t_list **lst, int fd, char *buf)
 {
 	t_list	*tmp;
 	t_list	*new;
@@ -93,12 +93,12 @@ static void	add_new_element(t_list **lst, int fd, char *buf)
 	if (tmp)
 	{
 		tmp->buf = buf;
-		return ;
+		return (1);
 	}
 	tmp = *lst;
 	new = malloc(sizeof(t_list));
 	if (!new)
-		return ;
+		return (0);
 	new->fd = fd;
 	new->buf = buf;
 	new->next = NULL;
@@ -110,6 +110,7 @@ static void	add_new_element(t_list **lst, int fd, char *buf)
 			tmp = tmp->next;
 		tmp->next = new;
 	}
+	return (1);
 }
 
 char	*get_next_line(int fd)
@@ -126,17 +127,16 @@ char	*get_next_line(int fd)
 		buf = matching_fd->buf;
 	if (!buf)
 		valid_read(fd, &buf);
-	while (buf)
+	while (buf && alloc_arr(&result, ft_strlen(buf)))
 	{
-		if (!alloc_arr(&result, ft_strlen(buf)))
-			break ;
 		if (read_until(&buf, &result))
 			break ;
 		valid_read(fd, &buf);
 	}
 	if (find_fd(&fd_lst, fd) && !buf)
 		rm_element(&fd_lst, fd);
-	else if (buf)
-		add_new_element(&fd_lst, fd, buf);
+	else if (buf && (!result || !add_new_element(&fd_lst, fd, buf)))
+		free(buf);
+	buf = NULL;
 	return (result);
 }

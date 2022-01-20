@@ -6,7 +6,7 @@
 /*   By: hyunkkim <hyunkkim@student.42seoul.>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/20 14:32:07 by hyunkkim          #+#    #+#             */
-/*   Updated: 2022/01/20 14:57:37 by hyunkkim         ###   ########.fr       */
+/*   Updated: 2022/01/20 20:54:08 by hyunkkim         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,10 +24,11 @@ static char	*read_until(char **buf, char **result)
 		if ((*buf)[i] == '\n')
 		{
 			(*result)[j] = (*buf)[i++];
-			alloc_arr(result, 0);
+			if (!alloc_arr(result, 0))
+				j = -1;
 			if ((*buf)[i])
 				ft_memmove((*buf), (*buf) + i, ft_strlen((*buf) + i) + 1);
-			else if (*buf)
+			else if (*buf || j == -1)
 			{
 				free(*buf);
 				*buf = NULL;
@@ -57,5 +58,8 @@ char	*get_next_line(int fd)
 			return (result);
 		is_valid = valid_read(fd, &buf);
 	}
+	if (buf && !result)
+		free(buf);
+	buf = NULL;
 	return (result);
 }
