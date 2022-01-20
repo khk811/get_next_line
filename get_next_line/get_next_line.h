@@ -4,6 +4,8 @@
 # include <stdlib.h>
 # include <unistd.h>
 
+//# define BUFFER_SIZE 10
+
 char	*get_next_line(int fd);
 char	*alloc_arr(char **arr, int size);
 void	*ft_memset(void *b, int c, int len);

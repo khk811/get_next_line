@@ -1,5 +1,16 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line_utils_bonus.c                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hyunkkim <hyunkkim@student.42seoul.>       +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/01/20 14:32:19 by hyunkkim          #+#    #+#             */
+/*   Updated: 2022/01/20 14:57:40 by hyunkkim         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "get_next_line_bonus.h"
-#include <stdio.h>
 
 int	ft_strlen(char *s)
 {
@@ -45,28 +56,28 @@ void	*ft_memmove(void *dst, void *src, int len)
 char	*alloc_arr(char **arr, int size)
 {
 	char	*tmp;
+	 int	tmp_len;
 
 	tmp = NULL;
-	if (!*arr)
-	{
-		*arr = (char *)malloc(sizeof(char) * (size + 1));
-		if (!*arr)
-			return (NULL);
-		ft_memset(*arr, 0, size + 1);
-	}
-	else if (*arr)
+	tmp_len = 0;
+	if (*arr)
 	{
 		tmp = (char *)malloc(sizeof(char) * (ft_strlen(*arr) + 1));
 		if (!tmp)
 			return (NULL);
 		ft_memmove(tmp, *arr, ft_strlen(*arr) + 1);
 		free(*arr);
-		*arr = (char *)malloc(sizeof(char) * (ft_strlen(tmp) + size + 1));
-		if (!*arr)
-			return (NULL);
-		ft_memset(*arr, 0, ft_strlen(tmp) + size + 1);
-		ft_memmove(*arr, tmp, ft_strlen(tmp) + 1);
+		tmp_len = ft_strlen(tmp);
+	}
+	*arr = (char *)malloc(sizeof(char) * (tmp_len + size + 1));
+	if (!*arr)
+		return (NULL);
+	ft_memset(*arr, 0, tmp_len + size + 1);
+	if (tmp)
+	{
+		ft_memmove(*arr, tmp, tmp_len + 1);
 		free(tmp);
+		tmp = NULL;
 	}
 	return (*arr);
 }
@@ -85,7 +96,7 @@ int	valid_read(int fd, char **buf)
 	else if (*buf)
 		ft_memset(*buf, 0, ft_strlen(*buf) + 1);
 	read_result = read(fd, *buf, BUFFER_SIZE);
-	if (read_result <= 0 && *buf)
+	if (read_result <= 0)
 	{
 		free(*buf);
 		*buf = NULL;

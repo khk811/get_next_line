@@ -1,5 +1,16 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hyunkkim <hyunkkim@student.42seoul.>       +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/01/20 14:32:12 by hyunkkim          #+#    #+#             */
+/*   Updated: 2022/01/20 14:57:35 by hyunkkim         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "get_next_line_bonus.h"
-#include <stdio.h>
 
 static char	*read_until(char **buf, char **result)
 {
@@ -18,7 +29,6 @@ static char	*read_until(char **buf, char **result)
 				ft_memmove((*buf), (*buf) + i, ft_strlen((*buf) + i) + 1);
 			else if (*buf)
 			{
-				ft_memset(*buf, 0, ft_strlen(*buf) + 1);
 				free(*buf);
 				*buf = NULL;
 			}
@@ -37,15 +47,9 @@ static t_list	*find_fd(t_list **lst, int fd)
 	if (!*lst || !lst)
 		return (NULL);
 	if (tmp->fd == fd)
-	{
 		return (tmp);
-	}
-	while (tmp->next)
-	{
-		if (tmp->fd == fd)
-			break ;
+	while (tmp->next && tmp->fd != fd)
 		tmp = tmp->next;
-	}
 	if (tmp->fd != fd)
 		return (NULL);
 	return (tmp);
@@ -58,7 +62,7 @@ static void	rm_element(t_list **lst, int fd)
 
 	before = NULL;
 	tmp = *lst;
-	if (!*lst)
+	if (!*lst || !lst)
 		return ;
 	if (!tmp->next)
 	{
