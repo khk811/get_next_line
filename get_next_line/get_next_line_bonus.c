@@ -6,7 +6,7 @@
 /*   By: hyunkkim <hyunkkim@student.42seoul.>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/20 14:32:12 by hyunkkim          #+#    #+#             */
-/*   Updated: 2022/01/24 17:13:54 by hyunkkim         ###   ########.fr       */
+/*   Updated: 2022/01/24 17:19:43 by hyunkkim         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ static char	*read_until(char **buf, char **result)
 		if ((*buf)[i] == '\n')
 		{
 			(*result)[j] = (*buf)[i++];
-			if(!alloc_arr(result, 0))
+			if (!alloc_arr(result, 0))
 				j = -1;
 			if ((*buf)[i])
 				ft_memmove((*buf), (*buf) + i, ft_strlen((*buf) + i) + 1);
